@@ -6,6 +6,7 @@ from mangum import Mangum
 
 from deps_graph_class import DependenciesGraph
 from get_deps import get_deps
+import os
 
 app = FastAPI()
 handler = Mangum(app)
@@ -19,9 +20,9 @@ app.add_middleware(
 )
 
 redis_db = redis.Redis(
-    host="redis-10374.c135.eu-central-1-1.ec2.cloud.redislabs.com",
-    port="10374",
-    password="Hih8DlOhcarSWjrIuGf6OC789nl9lU3Q",
+    host=os.environ.get("REDIS_HOST"),
+    port=os.environ.get("REDIS_PORT"),
+    password=os.environ.get("REDIS_PASSWORD"),
 )
 
 CACHE_REVALIDATE = 3600  # 1 hour

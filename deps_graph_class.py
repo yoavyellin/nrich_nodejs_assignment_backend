@@ -7,11 +7,11 @@ class DependenciesGraph:
         self.nodes = [
             {
                 "id": root_package,
-                "symbolType": "diamond",  # unique shape for the root
-                "color": "#fff",  # unique color for the root
+                "label": root_package,
+                "group": "root",
             }
         ]
-        self.links = []
+        self.edges = []
 
     def generate_graph(self, package=None):
         """
@@ -19,8 +19,8 @@ class DependenciesGraph:
 
         1. Get package deps
         2. For each dep:
-            2.1. If dep does exist in self.nodes, add link to self.links and return.
-            2.2. if dep doesn't exist in self.nodes, add it there, add link to self.links
+            2.1. If dep does exist in self.nodes, add edge to self.edges and return.
+            2.2. if dep doesn't exist in self.nodes, add it there, add edge to self.edges
                  and recursively call this function on this new node.
 
         """
@@ -33,13 +33,13 @@ class DependenciesGraph:
                 self.add_node(dep)
                 self.generate_graph(package=dep)
 
-            self.add_link(current_package, dep)
+            self.add_edge(current_package, dep)
 
-    def add_link(self, source, target):
-        self.links.append(
+    def add_edge(self, source, destination):
+        self.edges.append(
             {
-                "source": source,
-                "target": target,
+                "from": source,
+                "to": destination,
             }
         )
 
@@ -47,8 +47,7 @@ class DependenciesGraph:
         self.nodes.append(
             {
                 "id": package,
-                "symbolType": "circle",
-                "color": "#4f46e5",
+                "label": package,
             }
         )
 

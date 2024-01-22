@@ -3,10 +3,12 @@ import redis
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-
+import os
 from deps_graph_class import DependenciesGraph
 from get_deps import get_deps
-import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 handler = Mangum(app)
@@ -20,9 +22,9 @@ app.add_middleware(
 )
 
 redis_db = redis.Redis(
-    host=os.environ.get("REDIS_HOST"),
-    port=os.environ.get("REDIS_PORT"),
-    password=os.environ.get("REDIS_PASSWORD"),
+    host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"),
+    password=os.getenv("REDIS_PASSWORD"),
 )
 
 CACHE_REVALIDATE = 3600  # 1 hour
@@ -46,13 +48,13 @@ def main(package_name: str, response: Response):
             return {"error": f'"{package_name}" does not exist.'}
 
         # If package_name does exist, generate its graph and return the data
-        # in the correct format for react-d3-graph in the frontend.
+        # in the correct format for vis.js (graph package) in the frontend.
         try:
             deps_graph = DependenciesGraph(package_name)
             deps_graph.generate_graph()
 
             generated_deps_graph = {
-                "links": deps_graph.links,
+                "edges": deps_graph.edges,
                 "nodes": deps_graph.nodes,
             }
 
@@ -69,7 +71,9 @@ def main(package_name: str, response: Response):
 
 def package_exist(package_name):
     try:
-        if get_deps(package_name):
+        res = get_deps(package_name)
+
+        if len(res) >= 0:
             return True
         else:
             return False
